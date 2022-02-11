@@ -1,0 +1,12 @@
+# VS Code Settings
+.vscode
+
+# Binaries for programs and plugins
+*.so
+*.exe
+*.exe~
+*.dll
+*.dylib
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
