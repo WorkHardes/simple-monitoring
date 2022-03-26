@@ -14,10 +14,10 @@ lint:
 	golangci-lint run
 
 build:
-	go build ./cmd/api/main.go
+	go build ./cmd/app/main.go
 
 start-server:
-	go run ./cmd/api/main.go
+	go run ./cmd/app/main.go
 
 build-docker-image:
 	docker build -t $(DOCKER_IMAGE_NAME) $(DOCKERFILE_PATH)
