@@ -6,16 +6,16 @@ import (
 	"strings"
 
 	g "github.com/gosnmp/gosnmp"
-	"github.com/simple-monitoring/internal/service"
+	"github.com/simple-monitoring/internal/service/keenetic"
 )
 
 func walkFn(dataUnit g.SnmpPDU) error {
 	if strings.HasPrefix(dataUnit.Name, ".1.3.6.1.2.1.1") {
-		service.SysInfoHandler(dataUnit)
+		keenetic.SysInfoHandler(dataUnit)
 	} else if strings.HasPrefix(dataUnit.Name, ".1.3.6.1.2.1.2") {
-		service.NetInterfacesHandler(dataUnit)
+		keenetic.NetInterfacesHandler(dataUnit)
 	} else if strings.HasPrefix(dataUnit.Name, ".1.3.6.1.2.1.31") {
-		service.NetInterfacesExtendedHandler(dataUnit)
+		keenetic.NetInterfacesExtendedHandler(dataUnit)
 	}
 	return nil
 }
@@ -23,11 +23,11 @@ func walkFn(dataUnit g.SnmpPDU) error {
 func main() {
 	routerIP := "192.168.1.1"
 	routerManufacturer := "keenetic"
-	switch routerManufacturer {
+	switch strings.ToLower(routerManufacturer) {
 	case "keenetic":
 		break
 	default:
-		fmt.Println("This device is not supported yet.")
+		fmt.Println("This device manufacturer is not supported yet.")
 		return
 	}
 
@@ -42,4 +42,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("g.Default.BulkWalk() err: %v", err)
 	}
+
 }

@@ -1,4 +1,4 @@
-package service
+package keenetic
 
 import g "github.com/gosnmp/gosnmp"
 
