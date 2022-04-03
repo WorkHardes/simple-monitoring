@@ -21,9 +21,10 @@ func convert(dataUnit g.SnmpPDU) interface{} {
 	}
 }
 
-func NetInterfacesHandler(dataUnit g.SnmpPDU) {
+func GetNetIfacesInfo(dataUnit g.SnmpPDU, ch chan int) {
 	if oCounter == 0 {
 		countNetI = dataUnit.Value.(int)
+		ch <- countNetI
 		oCounter++
 
 		for i := 0; i < countNetI; i++ {
