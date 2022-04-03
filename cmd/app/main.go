@@ -9,13 +9,15 @@ import (
 	"github.com/simple-monitoring/internal/service/keenetic"
 )
 
+var ch = make(chan int, 1)
+
 func walkFn(dataUnit g.SnmpPDU) error {
 	if strings.HasPrefix(dataUnit.Name, ".1.3.6.1.2.1.1") {
 		keenetic.SysInfoHandler(dataUnit)
 	} else if strings.HasPrefix(dataUnit.Name, ".1.3.6.1.2.1.2") {
-		keenetic.NetInterfacesHandler(dataUnit)
+		keenetic.GetNetIfacesInfo(dataUnit, ch)
 	} else if strings.HasPrefix(dataUnit.Name, ".1.3.6.1.2.1.31") {
-		keenetic.NetInterfacesExtendedHandler(dataUnit)
+		keenetic.GetNetIExHandler(dataUnit, ch)
 	}
 	return nil
 }
