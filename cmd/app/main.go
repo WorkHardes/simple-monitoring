@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"strings"
 
 	g "github.com/gosnmp/gosnmp"
 	"github.com/simple-monitoring/internal/service/keenetic"
+	"github.com/simple-monitoring/pkg/logger"
 )
 
 var ch = make(chan int, 1)
@@ -29,20 +28,20 @@ func main() {
 	case "keenetic":
 		break
 	default:
-		fmt.Println("This device manufacturer is not supported yet.")
+		logger.Error("This device manufacturer is not supported yet")
 		return
 	}
 
 	g.Default.Target = routerIP
 	if err := g.Default.Connect(); err != nil {
-		log.Fatalf("Connect() err: %v", err)
+		logger.Errorf("Connect() err: %v", err)
 	}
 	defer g.Default.Conn.Close()
 
 	rootOid := ""
 	err := g.Default.BulkWalk(rootOid, walkFn)
 	if err != nil {
-		log.Fatalf("g.Default.BulkWalk() err: %v", err)
+		logger.Errorf("g.Default.BulkWalk() err: %v", err)
 	}
 
 }
