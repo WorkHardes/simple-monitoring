@@ -7,6 +7,6 @@ type WorkTime struct {
 	Seconds int
 }
 
-func NewWorkTime() *WorkTime {
-	return &WorkTime{}
+func NewWorkTime() WorkTime {
+	return WorkTime{}
 }
