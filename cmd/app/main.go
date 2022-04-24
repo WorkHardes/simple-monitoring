@@ -1,10 +1,17 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	g "github.com/gosnmp/gosnmp"
+	influxdb2Api "github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/simple-monitoring/internal/service/keenetic"
+	"github.com/simple-monitoring/pkg/database/influxdb"
 	"github.com/simple-monitoring/pkg/logger"
 )
 
@@ -19,6 +26,19 @@ func walkFn(dataUnit g.SnmpPDU) error {
 		keenetic.GetNetIExHandler(dataUnit, ch)
 	}
 	return nil
+}
+
+func writeSystemInfoToDB(writeAPI influxdb2Api.WriteAPIBlocking) {
+	metricsFields := map[string]string{"unit": "system-info"}
+	metricsValues := map[string]interface{}{"sys-descr": keenetic.SystemInfo.SysDescr, "sys-up-time": keenetic.SystemInfo.SysUpTime.ToString(), "sys-name": keenetic.SystemInfo.SysName}
+	point := influxdb.GetPoint(metricsFields, metricsValues)
+	influxdb.WriteInfoToDB(point, writeAPI)
+}
+
+func writeNetIInfoToDB(writeAPI influxdb2Api.WriteAPIBlocking) {
+}
+
+func writeNetIExInfoToDB(writeAPI influxdb2Api.WriteAPIBlocking) {
 }
 
 func main() {
@@ -39,9 +59,40 @@ func main() {
 	defer g.Default.Conn.Close()
 
 	rootOid := ""
-	err := g.Default.BulkWalk(rootOid, walkFn)
-	if err != nil {
-		logger.Errorf("g.Default.BulkWalk() err: %v", err)
-	}
+
+	idbs := influxdb.GetInfluxDBSettings()
+	client := influxdb.GetClient(idbs.Url, idbs.Token)
+	writeAPI := client.WriteAPIBlocking(idbs.Org, idbs.Bucket)
+
+	go func() {
+		for {
+			err := g.Default.BulkWalk(rootOid, walkFn)
+			if err != nil {
+				logger.Errorf("g.Default.BulkWalk() err: %v", err)
+			}
+
+			writeSystemInfoToDB(writeAPI)
+			writeNetIInfoToDB(writeAPI)
+			writeNetIExInfoToDB(writeAPI)
+
+			time.Sleep(5 * time.Second)
+		}
+	}()
+
+	logger.Info("Server started")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+
+	<-quit
+
+	const timeout = 5 * time.Second
+
+	_, shutdown := context.WithTimeout(context.Background(), timeout)
+	defer shutdown()
+
+	logger.Info("Server stopped")
+
+	client.Close()
 
 }
