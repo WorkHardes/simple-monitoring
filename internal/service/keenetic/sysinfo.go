@@ -5,7 +5,7 @@ import (
 	"github.com/simple-monitoring/internal/domain"
 )
 
-var oidCounter = 0
+var OidCounter = 0
 var SystemInfo = domain.SystemInfo{}
 
 func getSysUpTime(dataUnit g.SnmpPDU) domain.WorkTime {
@@ -22,7 +22,7 @@ func getSysUpTime(dataUnit g.SnmpPDU) domain.WorkTime {
 }
 
 func SysInfoHandler(dataUnit g.SnmpPDU) {
-	switch oidCounter {
+	switch OidCounter {
 	case 0:
 		{
 			sysDescr := convert(dataUnit).(string)
@@ -48,11 +48,15 @@ func SysInfoHandler(dataUnit g.SnmpPDU) {
 			SystemInfo.SysName = sysName
 		}
 	case 5:
-		// sysLocation
-		break
+		{
+			// sysLocation
+			break
+		}
 	case 6:
-		// sysServices
-		break
+		{
+			// sysServices
+			break
+		}
 	}
-	oidCounter++
+	OidCounter++
 }
