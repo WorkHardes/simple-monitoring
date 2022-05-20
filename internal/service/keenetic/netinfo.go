@@ -5,12 +5,12 @@ import (
 	"github.com/simple-monitoring/internal/domain"
 )
 
-var oCounter = 0
-var netICounter = -1
-var countNetI = -1
-var ocheck = false
-var iCounter = 0
-var netInterfaces = []domain.NetInterface{}
+var OCounter = 0
+var NetICounter = -1
+var CountNetI = -1
+var OCheck = false
+var ICounter = 0
+var NetInterfaces = []domain.NetInterface{}
 
 func convert(dataUnit g.SnmpPDU) interface{} {
 	if dataUnit.Type == g.OctetString {
@@ -22,109 +22,109 @@ func convert(dataUnit g.SnmpPDU) interface{} {
 }
 
 func GetNetIfacesInfo(dataUnit g.SnmpPDU, ch chan int) {
-	if oCounter == 0 {
-		countNetI = dataUnit.Value.(int)
-		ch <- countNetI
-		oCounter++
+	if OCounter == 0 {
+		CountNetI = dataUnit.Value.(int)
+		ch <- CountNetI
+		OCounter++
 
-		for i := 0; i < countNetI; i++ {
+		for i := 0; i < CountNetI; i++ {
 			netInterface := domain.NewNetInterface()
-			netInterfaces = append(netInterfaces, netInterface)
+			NetInterfaces = append(NetInterfaces, netInterface)
 		}
 		return
 	}
 
-	netICounter++
-	if netICounter != countNetI && !ocheck {
+	NetICounter++
+	if NetICounter != CountNetI && !OCheck {
 		return
 	}
-	ocheck = true
+	OCheck = true
 
-	if netICounter == countNetI {
-		netICounter = 0
-		iCounter++
+	if NetICounter == CountNetI {
+		NetICounter = 0
+		ICounter++
 	}
 
-	switch iCounter {
+	switch ICounter {
 	case 1:
 		{
 			Name := convert(dataUnit).(string)
-			netInterfaces[netICounter].Name = Name
+			NetInterfaces[NetICounter].Name = Name
 		}
 	case 2:
 		{
 			Type := dataUnit.Value.(int)
-			netInterfaces[netICounter].Type = Type
+			NetInterfaces[NetICounter].Type = Type
 		}
 	case 3:
 		{
 			Mtu := convert(dataUnit).(int)
-			netInterfaces[netICounter].Mtu = Mtu
+			NetInterfaces[NetICounter].Mtu = Mtu
 		}
 	case 4:
 		{
 			Speed := convert(dataUnit).(uint)
-			netInterfaces[netICounter].Speed = Speed
+			NetInterfaces[NetICounter].Speed = Speed
 		}
 	case 5:
 		{
 			PhysAddress := convert(dataUnit).(string)
-			netInterfaces[netICounter].PhysAddress = PhysAddress
+			NetInterfaces[NetICounter].PhysAddress = PhysAddress
 		}
 	case 6:
 		{
 			AdminStatus := convert(dataUnit).(int)
-			netInterfaces[netICounter].AdminStatus = AdminStatus
+			NetInterfaces[NetICounter].AdminStatus = AdminStatus
 		}
 	case 7:
 		{
 			OperStatus := convert(dataUnit).(int)
-			netInterfaces[netICounter].OperStatus = OperStatus
+			NetInterfaces[NetICounter].OperStatus = OperStatus
 		}
 	case 8:
 		{
 			LastChange := convert(dataUnit).(uint32)
-			netInterfaces[netICounter].LastChange = LastChange
+			NetInterfaces[NetICounter].LastChange = LastChange
 		}
 	case 9:
 		{
 			InOctets := convert(dataUnit).(uint)
-			netInterfaces[netICounter].InOctets = InOctets
+			NetInterfaces[NetICounter].InOctets = InOctets
 		}
 	case 10:
 		{
 			InUcastPkts := convert(dataUnit).(uint)
-			netInterfaces[netICounter].InUcastPkts = InUcastPkts
+			NetInterfaces[NetICounter].InUcastPkts = InUcastPkts
 		}
 	case 11:
 		{
 			InDiscard := convert(dataUnit).(uint)
-			netInterfaces[netICounter].InDiscard = InDiscard
+			NetInterfaces[NetICounter].InDiscard = InDiscard
 		}
 	case 12:
 		{
 			InErrors := convert(dataUnit).(uint)
-			netInterfaces[netICounter].InErrors = InErrors
+			NetInterfaces[NetICounter].InErrors = InErrors
 		}
 	case 13:
 		{
 			OutOctets := convert(dataUnit).(uint)
-			netInterfaces[netICounter].OutOctets = OutOctets
+			NetInterfaces[NetICounter].OutOctets = OutOctets
 		}
 	case 14:
 		{
 			OutUcastPkts := convert(dataUnit).(uint)
-			netInterfaces[netICounter].OutUcastPkts = OutUcastPkts
+			NetInterfaces[NetICounter].OutUcastPkts = OutUcastPkts
 		}
 	case 15:
 		{
 			OutDiscards := convert(dataUnit).(uint)
-			netInterfaces[netICounter].OutDiscards = OutDiscards
+			NetInterfaces[NetICounter].OutDiscards = OutDiscards
 		}
 	case 16:
 		{
 			OutErrors := convert(dataUnit).(uint)
-			netInterfaces[netICounter].OutErrors = OutErrors
+			NetInterfaces[NetICounter].OutErrors = OutErrors
 		}
 	}
 

@@ -1,20 +1,14 @@
 package keenetic
 
 import (
-	"fmt"
-
 	g "github.com/gosnmp/gosnmp"
 	"github.com/simple-monitoring/internal/domain"
 )
 
-var oidCounter = 0
+var OidCounter = 0
+var SystemInfo = domain.SystemInfo{}
 
-func getSysDescr(dataUnit g.SnmpPDU) string {
-	bytes := dataUnit.Value.([]byte)
-	return string(bytes)
-}
-
-func getSysUpTime(dataUnit g.SnmpPDU) *domain.WorkTime {
+func getSysUpTime(dataUnit g.SnmpPDU) domain.WorkTime {
 	timeTicks := int(dataUnit.Value.(uint32))
 	workSeconds := timeTicks / 100
 
@@ -27,17 +21,12 @@ func getSysUpTime(dataUnit g.SnmpPDU) *domain.WorkTime {
 	return wt
 }
 
-func getSysName(dataUnit g.SnmpPDU) string {
-	bytes := dataUnit.Value.([]byte)
-	return string(bytes)
-}
-
 func SysInfoHandler(dataUnit g.SnmpPDU) {
-	switch oidCounter {
+	switch OidCounter {
 	case 0:
 		{
-			sysDescr := getSysDescr(dataUnit)
-			fmt.Println("sysDescr:", sysDescr)
+			sysDescr := convert(dataUnit).(string)
+			SystemInfo.SysDescr = sysDescr
 		}
 	case 1:
 		{
@@ -46,7 +35,7 @@ func SysInfoHandler(dataUnit g.SnmpPDU) {
 	case 2:
 		{
 			sysUpTime := getSysUpTime(dataUnit)
-			fmt.Println("sysUpTime:", sysUpTime)
+			SystemInfo.SysUpTime = sysUpTime
 		}
 	case 3:
 		{
@@ -55,15 +44,19 @@ func SysInfoHandler(dataUnit g.SnmpPDU) {
 		}
 	case 4:
 		{
-			sysContact := getSysName(dataUnit)
-			fmt.Println("sysName:", sysContact)
+			sysName := convert(dataUnit).(string)
+			SystemInfo.SysName = sysName
 		}
 	case 5:
-		// sysLocation
-		break
+		{
+			// sysLocation
+			break
+		}
 	case 6:
-		// sysServices
-		break
+		{
+			// sysServices
+			break
+		}
 	}
-	oidCounter++
+	OidCounter++
 }
